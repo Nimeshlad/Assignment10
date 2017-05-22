@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:tracking="http://www.mulesoft.org/schema/mule/ee/tracking" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:validation="http://www.mulesoft.org/schema/mule/validation" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:spring="http://www.springframework.org/schema/beans" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/validation http://www.mulesoft.org/schema/mule/validation/current/mule-validation.xsd
+http://www.mulesoft.org/schema/mule/ee/tracking http://www.mulesoft.org/schema/mule/ee/tracking/current/mule-tracking-ee.xsd">
+   <http:listener-config name="HTTP_Listener_Configuration" host="0.0.0.0" port="8081" doc:name="HTTP Listener Configuration"/>
+    <validation:config name="Validation_Configuration" doc:name="Validation Configuration"/>
+	<flow name="assignment10a">
+		<http:listener config-ref="HTTP_Listener_Configuration" path="/validate" allowedMethods="POST" doc:name="HTTP"/>
+        <set-variable variableName="mail" value="#[message.inboundProperties.'http.query.params'.mail]" doc:name="Variable"/>
+        <validation:matches-regex config-ref="Validation_Configuration" value="#[flowVars.mail]" regex="^[a-zA-Z0-9_!#$%&amp;&#8217;*+/=?`{|}~^.-]+@[a-zA-Z0-9.-]+$" doc:name="Validation"/>
+        <set-payload value=" #[flowVars.mail] Email Is Valid" doc:name="Set Payload"/>
+        <logger message="#[payload]" level="INFO" doc:name="Logger"/>
+        <choice-exception-strategy doc:name="Choice Exception Strategy">
+            <catch-exception-strategy when="#[payload==null]" doc:name="Catch Exception Strategy">
+                <set-payload value=" #[flowVars.mail] Invalid Email Id" doc:name="Set Payload"/>
+            </catch-exception-strategy>
+        </choice-exception-strategy>
+	</flow>
+</mule>
